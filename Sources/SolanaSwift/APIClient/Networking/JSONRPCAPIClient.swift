@@ -95,10 +95,12 @@ public class JSONRPCAPIClient: SolanaAPIClient {
         return result.value
     }
     
-    public func getFeeForMessage(message: String, commitment: Commitment?) async throws -> FeeForMessage {
-        let result: Rpc<FeeForMessage> = try await get(method: "getFeeForMessage", params: [
-            message,
-            RequestConfiguration(commitment: commitment)])
+    public func getFeeForMessage(message: String, commitment: Commitment? = nil) async throws -> Lamports {
+        let result: Rpc<Lamports> = try await self.request(
+          method: "getFeeForMessage",
+          params: [message, RequestConfiguration(commitment: commitment)]
+        )
+        
         return result.value
     }
 
@@ -121,12 +123,11 @@ public class JSONRPCAPIClient: SolanaAPIClient {
     }
     
     public func getLatestBlockhash(commitment: Commitment? = nil) async throws -> String {
-        let result: Rpc<Fee> = try await get(method: "getLatestBlockhash",
-                                             params: [RequestConfiguration(commitment: commitment)])
-        guard let blockhash = result.value.blockhash else {
-            throw APIClientError.blockhashNotFound
-        }
-        return blockhash
+        let result: Rpc<LatestBlockhash> = try await get(
+            method: "getLatestBlockhash",
+            params: [RequestConfiguration(commitment: commitment)])
+        
+        return result.value.blockhash
     }
 
     public func getSignatureStatuses(signatures: [String],
@@ -191,7 +192,9 @@ public class JSONRPCAPIClient: SolanaAPIClient {
     }
 
     public func getTokenLargestAccounts(pubkey: String, commitment: Commitment? = nil) async throws -> [TokenAmount] {
-        try await get(method: "getTokenLargestAccounts", params: [pubkey, RequestConfiguration(commitment: commitment)])
+        let result: Rpc<[TokenAmount]> = try await get(method: "getTokenLargestAccounts", 
+                                                       params: [pubkey, RequestConfiguration(commitment: commitment)])
+        return result.value
     }
 
     public func getTokenSupply(pubkey: String, commitment: Commitment? = nil) async throws -> TokenAmount {
